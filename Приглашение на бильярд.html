@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Приглашение</title>
+<style>
+:root{
+  --bg:#E8E1F3; --card:#F7F3FB; --accent:#F0B5C4; --accent2:#BFE0CF; --ink:#4A3F5E;
+  box-sizing:border-box;
+  padding-top:env(safe-area-inset-top,0px);
+  padding-bottom:env(safe-area-inset-bottom,0px);
+}
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]){--bg:#2E2840; --card:#3B3452; --accent:#D58FA3; --accent2:#7FB097; --ink:#F2ECF8;}
+}
+*{box-sizing:border-box}
+html,body{height:100%;margin:0}
+body{
+  background:var(--bg);color:var(--ink);
+  font-family:"Georgia","Times New Roman",serif;
+  display:flex;align-items:center;justify-content:center;
+  padding:20px;overflow:hidden;
+}
+.card{
+  width:100%;max-width:420px;background:var(--card);
+  border-radius:28px;padding:32px 24px 28px;text-align:center;
+  box-shadow:0 10px 30px rgba(74,63,94,.15);
+}
+.balls{display:flex;justify-content:center;gap:10px;margin-bottom:22px}
+.ball{
+  width:38px;height:38px;border-radius:50%;
+  display:flex;align-items:center;justify-content:center;
+  font:700 15px/1 system-ui,sans-serif;color:var(--ink);
+}
+.ball.b1{background:var(--accent)}
+.ball.b2{background:var(--accent2)}
+.ball.b3{background:var(--ink);color:var(--card)}
+h1{font-size:25px;line-height:1.3;margin:0 0 12px;font-weight:700}
+p{font-size:18px;line-height:1.55;margin:0 0 26px}
+.row{display:flex;gap:14px;justify-content:center;min-height:56px;align-items:center}
+button{
+  font:600 18px/1 system-ui,sans-serif;border:0;border-radius:999px;
+  padding:16px 34px;cursor:pointer;color:var(--ink);
+  touch-action:manipulation;
+}
+button:focus-visible{outline:3px solid var(--ink);outline-offset:3px}
+#yes{background:var(--accent2)}
+#no{background:var(--accent);transition:left .25s ease,top .25s ease}
+#no.run{position:fixed;z-index:5}
+.overlay{
+  position:fixed;inset:0;background:rgba(46,40,64,.45);
+  display:none;align-items:center;justify-content:center;padding:20px;z-index:10;
+}
+.overlay.show{display:flex}
+.panel{
+  background:var(--card);border-radius:28px;padding:30px 24px;max-width:420px;width:100%;
+  text-align:center;border:3px solid var(--accent2);
+  animation:pop .35s ease;
+}
+.panel .ball{margin:0 auto 16px}
+.panel p{margin:0;font-size:18px}
+@keyframes pop{from{transform:scale(.85);opacity:0}to{transform:scale(1);opacity:1}}
+@media (prefers-reduced-motion:reduce){.panel{animation:none}#no{transition:none}}
+</style>
+</head>
+<body>
+<main class="card">
+  <div class="balls" aria-hidden="true">
+    <div class="ball b1">3</div><div class="ball b3">8</div><div class="ball b2">6</div>
+  </div>
+  <h1>Здравствуйте, Татьяна!</h1>
+  <p>Приглашаю вас на вечер-игру в бильярд. Устроим состязание и проверим, кто играет лучше?</p>
+  <div class="row">
+    <button id="yes" type="button">Да</button>
+    <button id="no" type="button">Нет</button>
+  </div>
+</main>
+
+<div class="overlay" id="overlay" role="dialog" aria-modal="true">
+  <div class="panel">
+    <div class="ball b3" aria-hidden="true">8</div>
+    <p>Спасибо, что согласились провести мастер-класс по игре в бильярд. Жду вас в бильярдной клуба Residenz в воскресенье в удобное для вас время. Жду вашего сообщения с подтверждением времени.</p>
+  </div>
+</div>
+
+<script>
+(function(){
+  var no=document.getElementById('no');
+  var yes=document.getElementById('yes');
+  var overlay=document.getElementById('overlay');
+  var placeholder=null;
+
+  function dodge(e){
+    if(e){e.preventDefault();e.stopPropagation();}
+    if(!no.classList.contains('run')){
+      var r=no.getBoundingClientRect();
+      placeholder=document.createElement('div');
+      placeholder.style.width=r.width+'px';
+      placeholder.style.height=r.height+'px';
+      no.parentNode.insertBefore(placeholder,no);
+      no.classList.add('run');
+      no.style.left=r.left+'px';
+      no.style.top=r.top+'px';
+      void no.offsetWidth;
+    }
+    var w=no.offsetWidth,h=no.offsetHeight,pad=12;
+    var maxX=window.innerWidth-w-pad,maxY=window.innerHeight-h-pad;
+    var cur=no.getBoundingClientRect(),x,y,tries=0;
+    do{
+      x=pad+Math.random()*(maxX-pad);
+      y=pad+Math.random()*(maxY-pad);
+      tries++;
+    }while(tries<20 && Math.hypot(x-cur.left,y-cur.top)<90);
+    no.style.left=Math.max(pad,x)+'px';
+    no.style.top=Math.max(pad,y)+'px';
+  }
+
+  no.addEventListener('pointerdown',dodge);
+  no.addEventListener('touchstart',dodge,{passive:false});
+  no.addEventListener('mouseenter',dodge);
+  no.addEventListener('click',function(e){e.preventDefault();dodge(e);});
+  no.addEventListener('keydown',function(e){if(e.key==='Enter'||e.key===' ')dodge(e);});
+
+  yes.addEventListener('click',function(){overlay.classList.add('show');});
+})();
+</script>
+</body>
+</html>
